@@ -1,64 +1,121 @@
-# AGENTS.md — 에이전트 진입점
+# AGENTS.md — 에이전트 실행 프로토콜
 
-> **이 파일은 지도입니다.** 상세 내용은 모두 `docs/`에 있습니다.
-> 코드를 작성하기 전에 반드시 아래 순서대로 읽으세요.
-
----
-
-## 이 프로젝트는 무엇인가
-
-SSAC_FRONTEND는 Next.js 15 App Router 기반의 프론트엔드 애플리케이션입니다.
-React 19 + TypeScript (strict) + Tailwind CSS v4 스택을 사용하며, 3인 팀이 AI 에이전트와 함께 개발합니다.
+> **이 파일은 읽는 문서가 아닙니다. 실행하는 프로토콜입니다.**
+> 모든 지시는 에이전트가 사람의 개입 없이 완수할 수 있는 형태로 작성되어 있습니다.
 
 ---
 
-## 코드 작성 전 반드시 읽어야 할 파일
+## 이 저장소
 
-| 순서 | 파일 | 이유 |
-|---|---|---|
-| 1 | [`docs/architecture.md`](docs/architecture.md) | 레이어 구조와 의존성 방향 — 이를 모르면 잘못된 import를 만든다 |
-| 2 | [`docs/conventions.md`](docs/conventions.md) | 네이밍, 파일 위치, 컴포넌트 형식 — PR 리젝의 90%는 여기서 발생한다 |
-| 3 | [`docs/decisions/`](docs/decisions/) | 과거에 왜 그렇게 결정했는지 — 같은 논쟁을 반복하지 않기 위해 |
+SSAC_FRONTEND — Next.js 15 App Router + TypeScript strict + Tailwind CSS v4 프론트엔드.
+3인 팀이 AI 에이전트와 함께 개발합니다.
 
 ---
 
-## 커밋 전 체크리스트
+## 태스크 시작 시 실행 순서 (매번)
 
-아래 모두 통과한 후에만 커밋하세요.
-
-```bash
-npm run build     # 빌드 성공 필수
-npm run lint      # ESLint 오류 0개 필수
-npm run format    # Prettier 포맷 적용
+```
+1. docs/architecture.md   → 내가 만들 파일이 어느 레이어인지 확인
+2. docs/conventions.md    → 해당 파일의 네이밍/형식 규칙 확인
+3. npm run lint           → 현재 위반 목록 파악 (내 변경 전 baseline)
 ```
 
-- [ ] `any` 타입을 사용하지 않았다
-- [ ] 새 파일이 `docs/architecture.md`의 레이어 규칙에 맞는 위치에 있다
-- [ ] 환경 변수를 직접 `process.env`로 접근하지 않고 `src/lib/env.ts`를 통해 접근했다
-- [ ] `console.log`를 디버깅 목적으로 남기지 않았다
+이 3단계를 건너뛰면 이후 수정 비용이 증가합니다.
 
 ---
 
-## 금지 행동
+## 파일 생성 의사결정 트리
 
-| 금지 | 이유 |
-|---|---|
-| `main` 브랜치에 직접 커밋 | 팀 리뷰 없이 코드가 배포됨 |
-| `src/app/`에서 `src/services/` 직접 import | UI → Service 직접 의존 금지, `features/` 를 경유할 것 |
-| `any` 타입 사용 | TypeScript strict의 의미가 없어짐 |
-| `process.env.XXX` 직접 참조 | `src/lib/env.ts` 경유 필수 |
-| 새 npm 패키지 임의 추가 | 팀 논의 후 `docs/decisions/`에 ADR 작성 필요 |
-| `docs/` 파일을 수정 없이 방치 | 코드 변경 시 관련 문서도 같이 업데이트 |
+```
+새 파일을 만들어야 할 때:
+
+Q1. 타입 정의인가?
+    YES → src/types/index.ts 에 추가 (새 파일 불필요)
+
+Q2. 여러 도메인에서 쓰이는 유틸/훅인가?
+    YES → src/lib/ 또는 src/hooks/
+
+Q3. API 통신 로직인가?
+    YES → src/services/<domain>.ts
+
+Q4. 특정 도메인에서만 쓰이는 UI 컴포넌트인가?
+    YES → src/features/<domain>/<ComponentName>.tsx
+
+Q5. 여러 도메인에서 쓰이는 순수 UI 컴포넌트인가?
+    YES → src/components/ui/<ComponentName>.tsx
+
+Q6. Next.js 페이지인가?
+    YES → src/app/<route>/page.tsx
+         (비즈니스 로직 없이 features/ 컴포넌트만 조립)
+
+판단 불가 → docs/architecture.md 의 레이어 매트릭스 참조
+```
 
 ---
 
-## 모르는 것이 있을 때
+## import 작성 전 확인
 
-| 질문 유형 | 참고 문서 |
+```
+현재 파일 레이어 → import 하려는 레이어 방향이 허용되는가?
+
+허용: 위 → 아래 방향만
+  app → features → components → hooks/services → lib/types
+
+즉시 금지 (ESLint가 잡지만 사전에 확인):
+  app/       → services/ 직접 import    ❌
+  components/ → services/ import        ❌
+  components/ → features/ import        ❌
+  lib/types   → 어느 레이어든 import     ❌
+```
+
+---
+
+## 커밋 전 자동 검증 시퀀스
+
+에이전트는 아래를 순서대로 실행하고, **모두 0 오류**일 때만 커밋합니다.
+
+```bash
+# 1. 타입 오류 검사
+npx tsc --noEmit
+
+# 2. 레이어 위반 + 코드 품질 검사
+npm run lint
+
+# 3. 포맷 자동 적용 (확인이 아닌 수정)
+npm run format
+
+# 4. 빌드 성공 확인
+npm run build
+```
+
+오류 발생 시:
+- ESLint 오류 → 오류 메시지 안의 `[FIX]` 지시를 따라 수정
+- 빌드 오류 → 오류 스택에서 파일:라인 추출 후 수정
+- 반복 실패(2회 이상 동일 오류) → `docs/agent-protocols/self-diagnose.md` 실행
+
+---
+
+## 에이전트 금지 행동
+
+| 금지 | 위반 시 결과 |
 |---|---|
-| "이 파일은 어디에 만들어야 하나?" | `docs/architecture.md` → 레이어 구조 |
-| "변수/함수 이름은 어떻게 짓나?" | `docs/conventions.md` → 네이밍 규칙 |
-| "왜 이렇게 설계됐나?" | `docs/decisions/` → ADR 목록 |
-| "처음 세팅은 어떻게 하나?" | `docs/onboarding.md` |
-| "현재 기술 부채는 무엇인가?" | `docs/quality.md` |
-| "에이전트가 과거에 한 실수는?" | `docs/decisions/` → `mistake-log-*.md` 패턴 파일 |
+| `main` 브랜치 직접 커밋 | CI가 차단하지 않으므로 팀 합의 파괴 |
+| `any` 타입 사용 | ESLint error — 빌드 불가 |
+| `process.env.*` 직접 접근 | `src/lib/env.ts` 경유 필수 |
+| 검증 없이 PR 생성 | CI 실패 = 팀원 리뷰 시간 낭비 |
+| `docs/` 수정 없이 아키텍처 변경 | 다음 에이전트가 잘못된 정보로 작업 |
+| 패키지 임의 추가 | `docs/decisions/` ADR 없이 불가 |
+
+---
+
+## 판단 불가 상황별 참조 프로토콜
+
+| 상황 | 실행할 프로토콜 |
+|---|---|
+| 파일 위치 불확실 | `docs/architecture.md` → 레이어 매트릭스 |
+| 네이밍 불확실 | `docs/conventions.md` → 대상별 규칙 표 |
+| "왜 이렇게 됐지?" | `docs/decisions/` → ADR 목록 |
+| CI 반복 실패 | `docs/agent-protocols/self-diagnose.md` |
+| 새 기능 추가 흐름 | `docs/agent-protocols/new-feature.md` |
+| 처음 세팅 | `docs/onboarding.md` |
+| 기술 부채 발견 | `docs/quality.md` → TD 항목 추가 |
