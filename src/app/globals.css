@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Custom base styles */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .container-page {
+    @apply mx-auto max-w-6xl px-4 sm:px-6;
+  }
+}

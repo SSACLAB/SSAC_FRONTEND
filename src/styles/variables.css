@@ -1,0 +1,14 @@
+/**
+ * Design token overrides.
+ * Add CSS custom properties here that Tailwind or components can reference.
+ */
+:root {
+  --color-brand: #2563eb;      /* blue-600 */
+  --color-brand-hover: #1d4ed8; /* blue-700 */
+
+  --radius-sm: 0.375rem;  /* rounded */
+  --radius-md: 0.5rem;    /* rounded-lg */
+  --radius-lg: 0.75rem;   /* rounded-xl */
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
