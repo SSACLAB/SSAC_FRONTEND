@@ -13,7 +13,8 @@
     "layers": "depcruise src --config .dependency-cruiser.cjs",
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run layers && npm run build",
     "scaffold": "node scripts/scaffold.js",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "sync:api": "./scripts/sync-api.sh"
   },
   "dependencies": {
     "next": "^16.2.4",

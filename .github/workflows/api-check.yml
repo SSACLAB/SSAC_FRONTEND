@@ -1,0 +1,117 @@
+name: API Contract Check
+
+# ──────────────────────────────────────────────
+# 워크플로우 1: PR 시 API 변경 감지 및 머지 블로킹
+# ──────────────────────────────────────────────
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  api-contract-check:
+    name: API Contract Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PR 브랜치와 base 브랜치 모두 필요
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # openapi-typescript 가 devDependencies에 없으면 임시 설치
+      - name: Ensure openapi-typescript
+        run: |
+          if ! npx --no openapi-typescript --version &>/dev/null 2>&1; then
+            npm install --save-dev openapi-typescript
+          fi
+
+      - name: Snapshot current swagger.json (base)
+        run: |
+          cp api-contract/swagger.json api-contract/swagger.json.base 2>/dev/null || true
+
+      - name: Run API sync
+        id: sync
+        env:
+          SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
+        run: |
+          set +e
+          output=$(./scripts/sync-api.sh 2>&1)
+          exit_code=$?
+          echo "$output"
+          echo "sync_output<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$output" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+
+      - name: Check if swagger.json changed
+        id: diff
+        run: |
+          if ! diff -q api-contract/swagger.json.base api-contract/swagger.json &>/dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read CHANGELOG entry
+        if: steps.diff.outputs.changed == 'true'
+        id: changelog
+        run: |
+          # CHANGELOG 첫 번째 섹션(최신 항목)만 추출
+          entry=$(awk '/^## /{if(found) exit; found=1} found{print}' api-contract/CHANGELOG.md | head -30)
+          echo "entry<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$entry" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Comment on PR — API changed
+        if: steps.diff.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changelog = `${{ steps.changelog.outputs.entry }}`;
+            const body = [
+              "## ⚠️ 백엔드 API가 변경되었습니다",
+              "",
+              "이 PR을 머지하기 전에 아래 절차를 완료해야 합니다:",
+              "",
+              "1. `api-contract/CHANGELOG.md` 에서 변경된 엔드포인트를 확인하세요.",
+              "2. 영향받는 컴포넌트와 훅을 업데이트하세요.",
+              "3. `npm run validate` 가 통과하는지 확인하세요.",
+              "4. 변경 사항을 커밋하고 이 PR을 업데이트하세요.",
+              "",
+              "### 감지된 변경 내역",
+              "```",
+              changelog,
+              "```",
+              "",
+              "> 이 코멘트는 API Contract Check 워크플로우가 자동으로 작성했습니다."
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+      - name: Fail CI if API changed
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          echo "❌ API 계약이 변경되었습니다. PR 코멘트를 확인하고 영향받는 코드를 업데이트하세요."
+          exit 1
+
+      - name: Success — no API change
+        if: steps.diff.outputs.changed == 'false'
+        run: echo "✅ API 계약 변경 없음 — 통과"

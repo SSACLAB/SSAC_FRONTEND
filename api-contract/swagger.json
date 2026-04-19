@@ -1,0 +1,10 @@
+{
+  "_comment": "이 파일은 scripts/sync-api.sh가 자동으로 갱신합니다. 수동 편집 금지.",
+  "_hint": "초기화 상태입니다. npm run sync:api 를 실행해 실제 Swagger를 받아오세요.",
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SSAC API (초기화 플레이스홀더)",
+    "version": "0.0.0"
+  },
+  "paths": {}
+}

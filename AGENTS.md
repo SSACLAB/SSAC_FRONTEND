@@ -59,3 +59,74 @@ npm run validate        # 모두 통과해야 커밋 가능
 | "왜 이 구조인가?"              | `docs/architecture.md` (`.dependency-cruiser.cjs` 의 설명) |
 | "새 패키지를 추가해도 되는가?" | `docs/agent-protocols/adr-create.md` 실행                  |
 | "CI가 계속 실패한다"           | `docs/agent-protocols/self-diagnose.md` 실행               |
+
+---
+
+## API 계약 규칙
+
+> API 타입은 **자동 생성된 단일 소스**에서만 가져옵니다.
+> 수동 타입 작성 및 스펙 외 엔드포인트 호출은 금지입니다.
+
+### 작업 시작 전 체크
+
+```bash
+# api-contract/swagger.json 최종 수정 시각 확인
+stat -c '%y' api-contract/swagger.json   # Linux/macOS
+```
+
+**24시간 이상 지났다면** API를 먼저 동기화한 후 작업을 시작하세요:
+
+```bash
+npm run sync:api
+```
+
+동기화 후 `⚠️ API가 변경되었습니다.` 메시지가 출력되면
+`api-contract/CHANGELOG.md`를 열어 변경된 엔드포인트를 확인하고
+영향받는 컴포넌트를 점검한 뒤 작업을 진행하세요.
+
+---
+
+### API 코드 작성 규칙
+
+| 규칙                        | 설명                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| **타입 import 경로**        | `api-contract/generated/api-types.ts` 에서만 import                            |
+| **수동 타입 작성 금지**     | API 응답 타입을 직접 `interface` / `type`으로 정의하지 않는다                  |
+| **스펙 외 엔드포인트 금지** | `swagger.json`의 `paths`에 없는 엔드포인트 호출 코드 작성 금지                 |
+| **불일치 시 행동**          | 실제 동작과 Swagger가 다를 경우 임의 수정 금지 — 백엔드 팀에 이슈 제기 후 대기 |
+
+```ts
+// ✅ 올바른 import
+import type { paths, components } from '@/api-contract/generated/api-types';
+
+// ❌ 금지: 수동 타입 작성
+interface UserResponse {
+  id: number;
+  name: string;
+}
+```
+
+---
+
+### Breaking Change 감지 시 행동 순서
+
+1. `npm run sync:api` 를 실행해 최신 스펙을 받아온다.
+2. `api-contract/CHANGELOG.md` 에서 제거·변경된 엔드포인트를 확인한다.
+3. 영향받는 파일을 `grep -r "제거된_엔드포인트" src/` 로 찾는다.
+4. 타입 오류를 `npm run typecheck` 로 전부 확인한다.
+5. 수정이 완료되면 `npm run validate` 로 전체 검증 후 커밋한다.
+6. 백엔드 팀과 합의 없이 API 경로·파라미터를 임의 변경하지 않는다.
+
+---
+
+### 동기화 실패 시
+
+```bash
+# SWAGGER_URL 환경변수가 필요합니다
+export SWAGGER_URL=https://api.example.com/api-docs/swagger.json
+npm run sync:api
+```
+
+- `❌ Swagger 다운로드 실패` → 백엔드 서버 상태 또는 URL을 확인하세요.
+- `❌ 유효한 JSON이 아닙니다` → 백엔드 팀에 Swagger 엔드포인트 상태를 문의하세요.
+- CI에서 `SWAGGER_URL` secret이 없으면 워크플로우가 실패합니다 — 저장소 Settings > Secrets에서 확인하세요.

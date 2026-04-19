@@ -11,7 +11,18 @@
       "Bash(node:*)",
       "Bash(git -C /c/Users/dhals_zn0ga5j/python_seed/SSAC_FRONTEND/SSAC_FRONTEND status --short)",
       "Bash(git add:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(chmod +x:*)",
+      "Bash(scripts/sync-api.sh)",
+      "Bash(.github/workflows/api-check.yml)",
+      "Bash(.github/workflows/api-sync-schedule.yml)",
+      "Bash(AGENTS.md)",
+      "Bash(package.json)",
+      "Bash(python3 /tmp/slack_notify.py)",
+      "Bash(python3 -c \"print\\('skipping slack'\\)\")",
+      "Bash(npm --version)",
+      "Bash(command -v npm)",
+      "Bash(command -v node)"
     ]
   }
 }
