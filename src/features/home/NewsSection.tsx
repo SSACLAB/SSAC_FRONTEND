@@ -9,7 +9,10 @@ export async function NewsSection() {
       <h2 className="mb-4 text-2xl font-bold text-gray-900">뉴스</h2>
       <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {items.map((item, i) => (
-          <div key={item.id} className="flex items-start gap-4 p-5 hover:bg-gray-50 transition-colors">
+          <div
+            key={item.id}
+            className="flex items-start gap-4 p-5 hover:bg-gray-50 transition-colors"
+          >
             {/* Color-coded index badge as image placeholder */}
             <div
               className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg text-2xl font-bold text-white"
@@ -24,10 +27,7 @@ export async function NewsSection() {
               <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-gray-500">
                 {item.summary}
               </p>
-              <time
-                dateTime={item.publishedAt}
-                className="text-xs text-gray-400"
-              >
+              <time dateTime={item.publishedAt} className="text-xs text-gray-400">
                 {formatDate(item.publishedAt)}
               </time>
             </div>

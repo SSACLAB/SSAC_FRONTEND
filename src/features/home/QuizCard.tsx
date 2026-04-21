@@ -28,14 +28,10 @@ export function QuizCard({ item }: QuizCardProps) {
               onClick={() => setSelected(i)}
               className={cn(
                 'w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors',
-                !revealed &&
-                  'border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-blue-50',
+                !revealed && 'border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-blue-50',
                 revealed && isCorrect && 'border-green-500 bg-green-50 text-green-800',
                 revealed && isSelected && !isCorrect && 'border-red-400 bg-red-50 text-red-700',
-                revealed &&
-                  !isSelected &&
-                  !isCorrect &&
-                  'border-gray-100 bg-gray-50 text-gray-400',
+                revealed && !isSelected && !isCorrect && 'border-gray-100 bg-gray-50 text-gray-400',
               )}
             >
               <span className="mr-2 font-medium">{String.fromCharCode(65 + i)}.</span>

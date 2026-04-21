@@ -38,20 +38,24 @@ export const homeService = {
 
   async getContent(): Promise<ContentItem[]> {
     const posts = await apiClient.get<Post[]>('/posts', { _start: 3, _limit: 6 });
-    return posts.map((p): ContentItem => ({
-      id: p.id,
-      title: p.title,
-      body: p.body,
-    }));
+    return posts.map(
+      (p): ContentItem => ({
+        id: p.id,
+        title: p.title,
+        body: p.body,
+      }),
+    );
   },
 
   async getNews(): Promise<NewsItem[]> {
     const posts = await apiClient.get<Post[]>('/posts', { _start: 9, _limit: 4 });
-    return posts.map((p, i): NewsItem => ({
-      id: p.id,
-      title: p.title,
-      summary: p.body.slice(0, 80).replace(/\n/g, ' '),
-      publishedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
-    }));
+    return posts.map(
+      (p, i): NewsItem => ({
+        id: p.id,
+        title: p.title,
+        summary: p.body.slice(0, 80).replace(/\n/g, ' '),
+        publishedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+      }),
+    );
   },
 };
