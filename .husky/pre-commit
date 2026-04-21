@@ -1,0 +1,17 @@
+#!/bin/sh
+# pre-commit: 변경된 파일만 auto-fix 후 검증 (빠름 ~3-5s)
+#
+# 흐름:
+#   1. lint-staged — 스테이징된 파일만 eslint --fix + prettier --write (incremental)
+#   2. typecheck   — 전체 타입 검사 (빌드 없이 ~2-3s)
+#
+# 팁: 커밋 전에 `npm run validate:fix` 로 미리 자동 수정하세요.
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+npx lint-staged
+npm run typecheck
+
+echo "✅ Pre-commit passed."

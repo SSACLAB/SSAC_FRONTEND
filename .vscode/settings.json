@@ -1,0 +1,26 @@
+{
+  // ── Prettier: 저장 시 자동 포매팅 ──────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  // ── ESLint: 저장 시 자동 수정 ─────────────────────────────────
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // ── TypeScript: 워크스페이스 버전 사용 ────────────────────────
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // ── Tailwind CSS IntelliSense ─────────────────────────────────
+  "tailwindCSS.experimental.classRegex": [["cn\\(([^)]*)\\)", "'([^']*)'"]],
+
+  // ── 파일 저장 시 후행 공백 제거 (prettier와 충돌 없음) ──────────
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}

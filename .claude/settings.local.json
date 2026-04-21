@@ -29,7 +29,8 @@
       "Bash(src/features/home/HomeSkeleton.tsx)",
       "Bash(src/app/page.tsx)",
       "Bash(python3:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(npx husky:*)"
     ]
   }
 }

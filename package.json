@@ -2,19 +2,35 @@
   "name": "ssac-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "layers": "depcruise src --config .dependency-cruiser.cjs",
     "validate": "npm run typecheck && npm run lint && npm run format:check && npm run layers && npm run build",
+    "validate:fix": "npm run lint:fix && npm run format",
+    "validate:staged": "lint-staged",
     "scaffold": "node scripts/scaffold.js",
-    "prepare": "git config core.hooksPath .githooks || true",
+    "prepare": "husky",
     "sync:api": "./scripts/sync-api.sh"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "next": "^16.2.4",
@@ -30,6 +46,8 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.4",
     "eslint-config-prettier": "^10.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.5.3",
     "tailwindcss": "^4",
     "typescript": "^5"

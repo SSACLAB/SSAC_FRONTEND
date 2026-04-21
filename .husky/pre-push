@@ -1,0 +1,13 @@
+#!/bin/sh
+# pre-push: 원격에 푸시하기 전 전체 검증 (build 포함, ~30-60s)
+#
+# 로컬에서 CI 실패를 사전에 차단합니다.
+# 비활성화가 필요하면: git push --no-verify
+
+set -e
+
+echo "🚀 Running pre-push full validation..."
+
+npm run validate
+
+echo "✅ Pre-push passed. Pushing to remote."

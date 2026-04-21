@@ -1,22 +1,9 @@
 #!/bin/sh
-# .githooks/pre-commit
+# ⚠️  이 파일은 더 이상 사용되지 않습니다.
 #
-# 커밋 전 자동 실행됩니다. 에이전트도 인간도 이 단계를 건너뛸 수 없습니다.
-# 활성화: npm install (prepare 스크립트가 git config core.hooksPath .githooks 실행)
-
-echo "🔍 Pre-commit validation..."
-
-node --run validate
-
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ]; then
-  echo ""
-  echo "❌ Commit blocked. Validation failed."
-  echo ""
-  echo "Fix the errors above, then commit again."
-  echo "For diagnosis, run: npm run validate"
-  exit 1
-fi
-
-echo "✅ Validation passed. Proceeding with commit."
+# 훅이 husky로 마이그레이션되었습니다.
+# 활성 훅 위치: .husky/pre-commit
+#
+# husky 활성화: npm install  (prepare 스크립트가 자동으로 실행됩니다)
+echo "[.githooks] 이 훅은 비활성화되었습니다. .husky/pre-commit 을 사용하세요." >&2
+exit 0
