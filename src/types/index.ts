@@ -41,6 +41,43 @@ export interface User {
 }
 
 // ============================================================
+// Home Domain Types
+// ============================================================
+
+export interface CarouselItem {
+  id: number;
+  title: string;
+  imageUrl: string;
+}
+
+export interface QuizItem {
+  id: number;
+  question: string;
+  options: [string, string, string, string];
+  correctIndex: 0 | 1 | 2 | 3;
+}
+
+export interface ContentItem {
+  id: number;
+  title: string;
+  body: string;
+}
+
+export interface NewsItem {
+  id: number;
+  title: string;
+  summary: string;
+  publishedAt: string;
+}
+
+export interface HomeData {
+  carousel: CarouselItem[];
+  quiz: QuizItem[];
+  content: ContentItem[];
+  news: NewsItem[];
+}
+
+// ============================================================
 // UI / Component Types
 // ============================================================
 

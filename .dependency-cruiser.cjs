@@ -22,8 +22,9 @@ module.exports = {
       comment:
         '[ARCH-001] app/ → services/ 직접 import 금지. ' +
         'features/<domain>/ 컴포넌트를 경유하세요. ' +
+        '예외: src/app/api/ Route Handler는 BFF 레이어이므로 services/ 직접 사용 허용. ' +
         '참고: docs/architecture.md',
-      from: { path: '^src/app' },
+      from: { path: '^src/app', pathNot: '^src/app/api' },
       to: { path: '^src/services' },
     },
 

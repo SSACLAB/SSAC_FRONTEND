@@ -26,9 +26,11 @@ const eslintConfig = [
   // ──────────────────────────────────────────────────────────
   // RULE 2: app/ → services/ 직접 import 금지 [ARCH-001]
   // FIX: features/<domain>/ 컴포넌트를 경유하세요. docs/architecture.md 참고
+  // 예외: src/app/api/ Route Handler는 BFF 레이어이므로 services/ 직접 사용 허용.
   // ──────────────────────────────────────────────────────────
   {
     files: ['src/app/**/*.{ts,tsx}'],
+    ignores: ['src/app/api/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

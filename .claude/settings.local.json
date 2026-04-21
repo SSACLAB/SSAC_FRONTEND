@@ -22,7 +22,13 @@
       "Bash(python3 -c \"print\\('skipping slack'\\)\")",
       "Bash(npm --version)",
       "Bash(command -v npm)",
-      "Bash(command -v node)"
+      "Bash(command -v node)",
+      "Bash(npx tsc:*)",
+      "Bash(src/features/home/)",
+      "Bash(src/app/api/home/route.ts)",
+      "Bash(src/features/home/HomeSkeleton.tsx)",
+      "Bash(src/app/page.tsx)",
+      "Bash(python3:*)"
     ]
   }
 }
