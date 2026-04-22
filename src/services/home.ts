@@ -1,4 +1,5 @@
 import { apiClient } from './api';
+import { getDailyQuiz } from '@/data/quiz-data';
 import type { CarouselItem, ContentItem, NewsItem, Post, QuizItem } from '@/types';
 
 // JSONPlaceholder photo shape (internal to this service)
@@ -23,16 +24,7 @@ export const homeService = {
   },
 
   async getQuiz(): Promise<QuizItem[]> {
-    const posts = await apiClient.get<Post[]>('/posts', { params: { _limit: 3 } });
-    return posts.map((p): QuizItem => {
-      const options: [string, string, string, string] = [
-        p.body.slice(0, 45).replace(/\n/g, ' '),
-        '다른 방법으로 접근하는 것이 좋습니다.',
-        '이 선택지는 관련이 없습니다.',
-        '전혀 다른 개념입니다.',
-      ];
-      return { id: p.id, question: p.title, options, correctIndex: 0 };
-    });
+    return getDailyQuiz();
   },
 
   async getContent(): Promise<ContentItem[]> {

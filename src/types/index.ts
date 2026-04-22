@@ -55,6 +55,24 @@ export interface QuizItem {
   question: string;
   options: [string, string, string, string];
   correctIndex: 0 | 1 | 2 | 3;
+  explanation: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface QuizAttempt {
+  quizId: number;
+  selectedIndex: number;
+  isCorrect: boolean;
+  answeredAt: string;
+}
+
+export interface QuizSession {
+  sessionId: string;
+  date: string;
+  attempts: QuizAttempt[];
+  score: number;
+  total: number;
 }
 
 export interface ContentItem {

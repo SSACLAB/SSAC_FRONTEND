@@ -22,16 +22,30 @@ export function CarouselSkeleton() {
 export function QuizSkeleton() {
   return (
     <section className="mb-12">
-      <SkeletonBlock className="h-10 w-36 mb-6" />
-      <div className="grid gap-6 sm:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-gray-100 bg-white p-6">
-            <SkeletonBlock className="h-5 w-full mb-2" />
-            <SkeletonBlock className="h-5 w-3/4 mb-6" />
-            {Array.from({ length: 4 }).map((_, j) => (
-              <SkeletonBlock key={j} className="h-10 w-full mb-2" />
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <SkeletonBlock className="h-8 w-48 mb-2" />
+          <SkeletonBlock className="h-4 w-64" />
+        </div>
+        <SkeletonBlock className="h-6 w-12 rounded-full" />
+      </div>
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonBlock key={i} className="h-2.5 w-2.5 rounded-full" />
             ))}
           </div>
+          <SkeletonBlock className="h-4 w-8" />
+        </div>
+        <div className="mb-4 flex gap-2">
+          <SkeletonBlock className="h-6 w-24 rounded-full" />
+          <SkeletonBlock className="h-6 w-14 rounded-full" />
+        </div>
+        <SkeletonBlock className="h-6 w-full mb-2" />
+        <SkeletonBlock className="h-6 w-4/5 mb-6" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonBlock key={i} className="h-12 w-full mb-2.5 rounded-xl" />
         ))}
       </div>
     </section>
