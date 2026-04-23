@@ -10,6 +10,7 @@ import {
   ContentSkeleton,
   NewsSkeleton,
 } from '@/features/home/HomeSkeleton';
+import { SearchBar } from '@/features/home/SearchBar';
 
 export const metadata: Metadata = {
   title: '홈',
@@ -38,6 +39,9 @@ export default function HomePage() {
         <p className="mx-auto max-w-xl text-lg text-gray-500">
           Next.js · TypeScript · Tailwind CSS 기반의 Production-ready 스타터 템플릿
         </p>
+        <div className="mx-auto mt-8 max-w-xl">
+          <SearchBar />
+        </div>
       </section>
 
       {/*

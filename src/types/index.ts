@@ -156,3 +156,27 @@ export interface QuizHistoryPage {
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
+
+// ============================================================
+// Search Domain Types
+// ============================================================
+
+export interface SearchResult {
+  id: number;
+  title: string;
+  summary: string;
+  category: string;
+  relevanceScore: number;
+}
+
+export interface SearchSuggestion {
+  keyword: string;
+  count: number;
+}
+
+export interface SearchResponse {
+  results: SearchResult[];
+  total: number;
+  query: string;
+  popularKeywords: SearchSuggestion[];
+}

@@ -26,22 +26,42 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      # SWAGGER_URL 시크릿 등록 여부 사전 확인
+      - name: Check SWAGGER_URL secret
+        id: check
+        env:
+          SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
+        run: |
+          if [ -z "$SWAGGER_URL" ]; then
+            echo "⚠️ SWAGGER_URL 시크릿이 설정되지 않았습니다. 스케줄 동기화를 건너뜁니다."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skipped — SWAGGER_URL not configured
+        if: steps.check.outputs.available == 'false'
+        run: echo "ℹ️ SWAGGER_URL 시크릿 미설정 — 스케줄 API sync를 건너뜁니다."
+
       - name: Ensure openapi-typescript
+        if: steps.check.outputs.available == 'true'
         run: |
           if ! npx --no openapi-typescript --version &>/dev/null 2>&1; then
             npm install --save-dev openapi-typescript
           fi
 
       - name: Snapshot current swagger.json (before sync)
+        if: steps.check.outputs.available == 'true'
         run: cp api-contract/swagger.json api-contract/swagger.json.before 2>/dev/null || true
 
       - name: Run API sync
+        if: steps.check.outputs.available == 'true'
         id: sync
         env:
           SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
@@ -51,6 +71,7 @@ jobs:
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Check for changes
+        if: steps.check.outputs.available == 'true'
         id: diff
         run: |
           if git diff --quiet api-contract/; then
@@ -60,11 +81,11 @@ jobs:
           fi
 
       - name: No changes — done
-        if: steps.diff.outputs.changed == 'false'
+        if: steps.check.outputs.available == 'true' && steps.diff.outputs.changed == 'false'
         run: echo "✅ API 동기화 완료 — 변경사항 없음"
 
       - name: Prepare PR branch
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.check.outputs.available == 'true' && steps.diff.outputs.changed == 'true'
         id: branch
         run: |
           DATE=$(date '+%Y-%m-%d')
@@ -81,7 +102,7 @@ jobs:
           git push origin "$BRANCH"
 
       - name: Read latest CHANGELOG entry
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.check.outputs.available == 'true' && steps.diff.outputs.changed == 'true'
         id: changelog
         run: |
           entry=$(awk '/^## /{if(found) exit; found=1} found{print}' api-contract/CHANGELOG.md | head -40)
@@ -90,7 +111,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create sync PR
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.check.outputs.available == 'true' && steps.diff.outputs.changed == 'true'
         uses: actions/github-script@v7
         with:
           script: |

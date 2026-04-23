@@ -30,7 +30,20 @@
       "Bash(src/app/page.tsx)",
       "Bash(python3:*)",
       "Bash(npx prettier:*)",
-      "Bash(npx husky:*)"
+      "Bash(npx husky:*)",
+      "Bash(src/features/home/SearchBar.tsx)",
+      "Bash(src/app/search/page.tsx)",
+      "Bash(src/app/api/search/)",
+      "Bash(suggest/)",
+      "Bash(log/)",
+      "Bash(where npx:*)",
+      "Read(//c/Program Files/nodejs/**)",
+      "Bash(.husky/pre-commit)",
+      "Bash(npx lint-staged:*)",
+      "Bash(./node_modules/.bin/lint-staged)",
+      "Bash(C:/Program Files/nodejs/npx)",
+      "Bash(./node_modules/.bin/eslint src/features/home/SearchBar.tsx)",
+      "Bash(SearchBar.tsx)"
     ]
   }
 }

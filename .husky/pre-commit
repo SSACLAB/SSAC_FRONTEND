@@ -11,7 +11,7 @@ set -e
 
 echo "🔍 Running pre-commit checks..."
 
-npx lint-staged
+./node_modules/.bin/lint-staged
 npm run typecheck
 
 echo "✅ Pre-commit passed."
