@@ -47,7 +47,34 @@ export interface User {
 export interface CarouselItem {
   id: number;
   title: string;
-  imageUrl: string;
+  subtitle?: string;
+  description?: string;
+  imageUrl?: string;
+  bgGradient?: string;
+  icon?: string;
+  badge?: string;
+  ctaLabel?: string;
+  linkUrl: string;
+  linkType: 'internal' | 'external';
+}
+
+export interface CarouselTrackEvent {
+  itemId: number;
+  position: number;
+  eventType: 'impression' | 'click' | 'swipe';
+  stayDurationMs?: number;
+  sessionId: string;
+  timestamp: string;
+}
+
+export interface CarouselItemStats {
+  itemId: number;
+  impressions: number;
+  clicks: number;
+  swipes: number;
+  totalStayMs: number;
+  ctr: number;
+  avgStayMs: number;
 }
 
 export interface QuizItem {

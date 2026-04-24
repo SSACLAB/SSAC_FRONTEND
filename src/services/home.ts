@@ -1,29 +1,14 @@
 import { apiClient } from './api';
 import { getDailyQuiz } from '@/data/quiz-data';
+import { CAROUSEL_ITEMS } from '@/data/carousel-data';
 import type { CarouselItem, ContentItem, NewsItem, Post, QuizItem } from '@/types';
-
-// JSONPlaceholder photo shape (internal to this service)
-interface JsonPlaceholderPhoto {
-  id: number;
-  albumId: number;
-  title: string;
-  url: string;
-  thumbnailUrl: string;
-}
 
 const NEWS_SOURCES = ['한국경제', '매일경제', '연합뉴스', '조선비즈', '머니투데이'];
 const NEWS_CATEGORIES = ['주식', '환율', '부동산', '채권', '암호화폐', '금리', '펀드'];
 
 export const homeService = {
   async getCarousel(): Promise<CarouselItem[]> {
-    const photos = await apiClient.get<JsonPlaceholderPhoto[]>('/photos', {
-      params: { albumId: 1, _limit: 5 },
-    });
-    return photos.map((p) => ({
-      id: p.id,
-      title: p.title,
-      imageUrl: p.url,
-    }));
+    return CAROUSEL_ITEMS;
   },
 
   async getQuiz(): Promise<QuizItem[]> {
