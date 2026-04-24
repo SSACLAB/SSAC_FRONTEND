@@ -11,6 +11,7 @@
   "tags": [
     { "name": "Profile", "description": "프로필 조회 및 수정 API" },
     { "name": "QuizAttempt", "description": "퀴즈 응시 기록 및 통계 API" },
+    { "name": "Recommendation", "description": "개인화 퀴즈 추천 API" },
     { "name": "토큰 관리", "description": "Access Token 재발급 및 로그아웃 API" },
     { "name": "Admin", "description": "관리자 전용 사용자 관리 API" },
     { "name": "네이버 OAuth", "description": "네이버 소셜 로그인 API" }
@@ -529,6 +530,67 @@
         "security": [{ "bearerAuth": [] }]
       }
     },
+    "/api/v1/recommendations": {
+      "get": {
+        "tags": ["Recommendation"],
+        "summary": "개인화 퀴즈 추천 조회",
+        "description": "[호출 화면] 홈 화면 또는 마이페이지 > 추천 퀴즈\n[권한 조건] 로그인 필수 (JWT Bearer 토큰, GUEST 불가)\n[특이 동작]\n- 학습 기록이 없는 신규 사용자: 최신 퀴즈 5개를 기본 추천 (personalized=false)\n- 기존 사용자: 최근 30일 활동 기준으로\n    * 정답률 70% 미만 퀴즈 최대 3개 (RETRY)\n    * 아직 응시하지 않은 최신 퀴즈 최대 3개 (UNTRIED)\n  를 혼합 추천 (personalized=true)\n",
+        "operationId": "getRecommendations",
+        "responses": {
+          "401": {
+            "description": "인증 토큰이 없거나 만료되었습니다.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseError" },
+                "examples": {
+                  "error": {
+                    "value": "{\"success\":false,\"data\":null,\"message\":\"인증이 필요합니다. 토큰을 확인하세요.\"}"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "사용자를 찾을 수 없음",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendationResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "추천 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendationResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "비회원(GUEST) 접근 불가",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendationResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "서버 내부 오류. 동일한 요청이 반복되면 백엔드 팀에 문의하세요.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseError" },
+                "examples": {
+                  "error": {
+                    "value": "{\"success\":false,\"data\":null,\"message\":\"서버 내부 오류가 발생했습니다.\"}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
     "/api/v1/quiz-attempts/{attemptId}": {
       "get": {
         "tags": ["QuizAttempt"],
@@ -1014,6 +1076,69 @@
           "createdAt": { "type": "string", "format": "date-time", "description": "가입일시" }
         }
       },
+      "ApiResponseRecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/RecommendationResponse" },
+          "message": { "type": "string" },
+          "loginRequired": { "type": "boolean" }
+        }
+      },
+      "RecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "personalized": {
+            "type": "boolean",
+            "description": "개인화 추천 여부 (false: 신규 사용자 기본 추천, true: 학습 기록 기반 추천)"
+          },
+          "recommendations": {
+            "type": "array",
+            "description": "추천 퀴즈 목록",
+            "items": { "$ref": "#/components/schemas/RecommendedQuizResponse" }
+          }
+        }
+      },
+      "RecommendedQuizResponse": {
+        "type": "object",
+        "properties": {
+          "quizId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "퀴즈 ID",
+            "example": 1
+          },
+          "title": { "type": "string", "description": "퀴즈 제목", "example": "Spring Boot 기초" },
+          "description": {
+            "type": "string",
+            "description": "퀴즈 설명",
+            "example": "Spring Boot 핵심 개념을 묻는 퀴즈"
+          },
+          "maxScore": {
+            "type": "integer",
+            "format": "int32",
+            "description": "최고 점수",
+            "example": 100
+          },
+          "totalQuestions": {
+            "type": "integer",
+            "format": "int32",
+            "description": "전체 문항 수",
+            "example": 10
+          },
+          "type": {
+            "type": "string",
+            "description": "추천 유형 (DEFAULT / RETRY / UNTRIED)",
+            "enum": ["DEFAULT", "RETRY", "UNTRIED"]
+          },
+          "lastAccuracyRate": {
+            "type": "number",
+            "format": "double",
+            "description": "마지막 응시 정답률 % (RETRY 타입만, 나머지는 null)",
+            "example": 45.0
+          }
+        }
+      },
       "ApiResponsePageQuizAttemptSummaryResponse": {
         "type": "object",
         "properties": {
@@ -1026,8 +1151,10 @@
       "PageQuizAttemptSummaryResponse": {
         "type": "object",
         "properties": {
-          "totalPages": { "type": "integer", "format": "int32" },
           "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
           "size": { "type": "integer", "format": "int32" },
           "content": {
             "type": "array",
@@ -1035,8 +1162,6 @@
           },
           "number": { "type": "integer", "format": "int32" },
           "sort": { "$ref": "#/components/schemas/SortObject" },
-          "first": { "type": "boolean" },
-          "last": { "type": "boolean" },
           "numberOfElements": { "type": "integer", "format": "int32" },
           "pageable": { "$ref": "#/components/schemas/PageableObject" },
           "empty": { "type": "boolean" }
@@ -1048,8 +1173,8 @@
           "offset": { "type": "integer", "format": "int64" },
           "sort": { "$ref": "#/components/schemas/SortObject" },
           "paged": { "type": "boolean" },
-          "pageSize": { "type": "integer", "format": "int32" },
           "pageNumber": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
           "unpaged": { "type": "boolean" }
         }
       },
@@ -1264,8 +1389,10 @@
       "PageUserSummaryResponse": {
         "type": "object",
         "properties": {
-          "totalPages": { "type": "integer", "format": "int32" },
           "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
           "size": { "type": "integer", "format": "int32" },
           "content": {
             "type": "array",
@@ -1273,8 +1400,6 @@
           },
           "number": { "type": "integer", "format": "int32" },
           "sort": { "$ref": "#/components/schemas/SortObject" },
-          "first": { "type": "boolean" },
-          "last": { "type": "boolean" },
           "numberOfElements": { "type": "integer", "format": "int32" },
           "pageable": { "$ref": "#/components/schemas/PageableObject" },
           "empty": { "type": "boolean" }
