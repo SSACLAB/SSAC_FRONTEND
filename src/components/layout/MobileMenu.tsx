@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -65,10 +66,16 @@ export function MobileMenu({ appName }: { appName: string }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
   const drawerRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
-  // 라우트 변경 시 메뉴 닫기 (useEffect 대신 렌더 중 파생 상태 갱신 — React 권장 패턴)
+  // 라우트 변경 시 메뉴 닫기
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
@@ -125,116 +132,123 @@ export function MobileMenu({ appName }: { appName: string }) {
         {isOpen ? <CloseIcon /> : <HamburgerIcon />}
       </button>
 
-      {/* 백드롭 */}
-      {isOpen && (
-        <div
-          aria-hidden="true"
-          className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* createPortal을 사용하여 헤더의 CSS 제약(backdrop-blur)에서 탈출합니다.
+        z-index를 100 이상으로 주어 다른 고정 요소들보다 확실히 위에 오도록 보장합니다.
+      */}
+      {mounted &&
+        createPortal(
+          <div className="md:hidden">
+            {/* 백드롭 */}
+            {isOpen && (
+              <div
+                aria-hidden="true"
+                className="fixed inset-0 z-[100] bg-black/40"
+                onClick={() => setIsOpen(false)}
+              />
+            )}
 
-      {/* 드로어 패널 */}
-      <div
-        id="mobile-nav-drawer"
-        ref={drawerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="메뉴"
-        className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-72 flex-col bg-white shadow-2xl transition-transform duration-300',
-          isOpen ? 'translate-x-0' : 'translate-x-full',
+            {/* 드로어 패널 */}
+            <div
+              id="mobile-nav-drawer"
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="메뉴"
+              className={cn(
+                'fixed inset-y-0 right-0 z-[110] flex w-72 flex-col bg-white transition-all duration-300',
+                isOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full shadow-none',
+              )}
+            >
+              {/* 드로어 헤더 */}
+              <div className="flex h-16 items-center justify-between border-b border-gray-200 px-5">
+                <span className="text-base font-bold text-gray-900">{appName}</span>
+                <button
+                  type="button"
+                  aria-label="메뉴 닫기"
+                  onClick={() => setIsOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+
+              {/* 메뉴 아이템 */}
+              <nav aria-label="모바일 메뉴" className="flex-1 overflow-y-auto px-3 py-4">
+                <ul className="space-y-1">
+                  {NAV_ITEMS.map((item) => {
+                    const active = isActive(item.href);
+                    const isExpanded = expanded === item.href;
+
+                    if (!item.children) {
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            aria-current={active ? 'page' : undefined}
+                            className={cn(
+                              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                              active
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                            )}
+                          >
+                            <NavIcon path={item.iconPath} />
+                            {item.label}
+                          </Link>
+                        </li>
+                      );
+                    }
+
+                    return (
+                      <li key={item.href}>
+                        <button
+                          type="button"
+                          aria-expanded={isExpanded}
+                          onClick={() => toggleExpanded(item.href)}
+                          className={cn(
+                            'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                            active || isExpanded
+                              ? 'bg-blue-50 text-blue-700'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                          )}
+                        >
+                          <NavIcon path={item.iconPath} />
+                          <span className="flex-1 text-left">{item.label}</span>
+                          <ChevronRight open={isExpanded} />
+                        </button>
+
+                        {isExpanded && (
+                          <ul className="mt-1 ml-4 space-y-1 border-l-2 border-gray-100 pl-3">
+                            {item.children.map((child) => {
+                              const childActive = pathname === child.href;
+                              return (
+                                <li key={child.href}>
+                                  <Link
+                                    href={child.href}
+                                    aria-current={childActive ? 'page' : undefined}
+                                    className={cn(
+                                      'block rounded-lg px-3 py-2 text-sm transition-colors',
+                                      childActive
+                                        ? 'font-medium text-blue-700'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                    )}
+                                  >
+                                    {child.label}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </div>
+          </div>,
+          document.body,
         )}
-      >
-        {/* 드로어 헤더 */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-5">
-          <span className="text-base font-bold text-gray-900">{appName}</span>
-          <button
-            type="button"
-            aria-label="메뉴 닫기"
-            onClick={() => setIsOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        {/* 메뉴 아이템 */}
-        <nav aria-label="모바일 메뉴" className="flex-1 overflow-y-auto px-3 py-4">
-          <ul className="space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item.href);
-              const isExpanded = expanded === item.href;
-
-              if (!item.children) {
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      aria-current={active ? 'page' : undefined}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                        active
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
-                      )}
-                    >
-                      <NavIcon path={item.iconPath} />
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              }
-
-              return (
-                <li key={item.href}>
-                  {/* 아코디언 토글 */}
-                  <button
-                    type="button"
-                    aria-expanded={isExpanded}
-                    onClick={() => toggleExpanded(item.href)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      active || isExpanded
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
-                    )}
-                  >
-                    <NavIcon path={item.iconPath} />
-                    <span className="flex-1 text-left">{item.label}</span>
-                    <ChevronRight open={isExpanded} />
-                  </button>
-
-                  {/* 하위 메뉴 (아코디언) */}
-                  {isExpanded && (
-                    <ul className="mt-1 ml-4 space-y-1 border-l-2 border-gray-100 pl-3">
-                      {item.children.map((child) => {
-                        const childActive = pathname === child.href;
-                        return (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              aria-current={childActive ? 'page' : undefined}
-                              className={cn(
-                                'block rounded-lg px-3 py-2 text-sm transition-colors',
-                                childActive
-                                  ? 'font-medium text-blue-700'
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                              )}
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </div>
     </div>
   );
 }
