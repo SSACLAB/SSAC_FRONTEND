@@ -166,6 +166,7 @@ export function DesktopNav() {
               aria-current={active ? 'page' : undefined}
               className={cn(
                 'flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
                 active
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
@@ -197,6 +198,7 @@ export function DesktopNav() {
               onKeyDown={(e) => onTriggerKey(e, item)}
               className={cn(
                 'flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
                 active || isOpen
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
@@ -223,6 +225,7 @@ export function DesktopNav() {
                         onClick={() => setOpenItem(null)}
                         className={cn(
                           'block px-4 py-2.5 transition-colors',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500',
                           childActive
                             ? 'bg-blue-50 text-blue-700'
                             : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
