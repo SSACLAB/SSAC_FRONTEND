@@ -127,7 +127,7 @@ export function MobileMenu({ appName }: { appName: string }) {
         aria-expanded={isOpen}
         aria-controls="mobile-nav-drawer"
         onClick={() => setIsOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       >
         {isOpen ? <CloseIcon /> : <HamburgerIcon />}
       </button>
@@ -166,7 +166,7 @@ export function MobileMenu({ appName }: { appName: string }) {
                   type="button"
                   aria-label="메뉴 닫기"
                   onClick={() => setIsOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 >
                   <CloseIcon />
                 </button>
@@ -187,6 +187,7 @@ export function MobileMenu({ appName }: { appName: string }) {
                             aria-current={active ? 'page' : undefined}
                             className={cn(
                               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
                               active
                                 ? 'bg-blue-50 text-blue-700'
                                 : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
@@ -207,6 +208,7 @@ export function MobileMenu({ appName }: { appName: string }) {
                           onClick={() => toggleExpanded(item.href)}
                           className={cn(
                             'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
                             active || isExpanded
                               ? 'bg-blue-50 text-blue-700'
                               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
@@ -228,6 +230,7 @@ export function MobileMenu({ appName }: { appName: string }) {
                                     aria-current={childActive ? 'page' : undefined}
                                     className={cn(
                                       'block rounded-lg px-3 py-2 text-sm transition-colors',
+                                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
                                       childActive
                                         ? 'font-medium text-blue-700'
                                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
