@@ -115,7 +115,10 @@ export interface NewsItem {
   source: string;
   category: string;
   publishedAt: string;
+  importance: number;
 }
+
+export type NewsSortType = 'latest' | 'importance';
 
 export interface HomeData {
   carousel: CarouselItem[];
