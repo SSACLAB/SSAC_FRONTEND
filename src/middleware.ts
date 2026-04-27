@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
 
   if (!isProtected) return NextResponse.next();
 
-  const authCookie = request.cookies.get('ssac_auth');
+  const authCookie = request.cookies.get('accessToken');
   if (!authCookie) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirectTo', pathname);

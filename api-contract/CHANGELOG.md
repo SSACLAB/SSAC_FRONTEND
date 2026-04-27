@@ -1,3 +1,10 @@
+## 2026-04-27 12:41 동기화
+
+**추가된 엔드포인트:**
+  + GET /login/oauth2/code/kakao
+  + GET /oauth2/authorization/kakao
+
+
 ## 2026-04-27 00:10 동기화
 
 **추가된 엔드포인트:**
