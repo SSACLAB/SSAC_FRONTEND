@@ -35,6 +35,8 @@ export function LoginForm() {
   const handleKakaoLogin = () => {
     if (isLoading) return;
     setIsKakaoLoading(true);
+    // redirectTo를 sessionStorage에 저장 → 콜백 페이지에서 읽어 이동
+    sessionStorage.setItem('kakaoRedirectTo', redirectTo);
     const kakaoUrl = new URL('/oauth2/authorization/kakao', env.backendUrl);
     kakaoUrl.searchParams.set('redirectTo', redirectTo);
     window.location.href = kakaoUrl.toString();

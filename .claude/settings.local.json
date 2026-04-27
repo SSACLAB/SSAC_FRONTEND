@@ -65,7 +65,9 @@
       "Bash(src/app/auth/kakao/callback/page.tsx)",
       "Bash(src/app/login/LoginForm.tsx)",
       "Bash(src/services/api.ts)",
-      "Bash(.env.local)"
+      "Bash(.env.local)",
+      "Bash(?token=)",
+      "Bash(LoginForm.tsx)"
     ]
   }
 }
