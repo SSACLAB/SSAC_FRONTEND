@@ -3,7 +3,7 @@ import type { components } from '@/api-contract/generated/api-types';
 
 export async function GET(): Promise<Response> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('ssac_auth')?.value;
+  const token = cookieStore.get('accessToken')?.value;
   if (!token) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }

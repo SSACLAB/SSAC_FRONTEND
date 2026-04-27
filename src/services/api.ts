@@ -10,7 +10,20 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
   params?: Record<string, string | number | boolean>;
 }
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+async function tryRefreshToken(): Promise<boolean> {
+  try {
+    const res = await fetch('/api/v1/auth/reissue', { method: 'POST' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function request<T>(
+  endpoint: string,
+  options: RequestOptions = {},
+  _retried = false,
+): Promise<T> {
   const { body, params, headers, ...rest } = options;
 
   // Build query string
@@ -23,7 +36,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   const isFormData = body instanceof FormData;
 
-  const response = await fetch(url.toString(), {
+  const fetchOptions: RequestInit = {
     ...rest,
     headers: {
       ...(!isFormData && { 'Content-Type': 'application/json' }),
@@ -32,7 +45,20 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     ...(body !== undefined && {
       body: isFormData ? body : JSON.stringify(body),
     }),
-  });
+  };
+
+  const response = await fetch(url.toString(), fetchOptions);
+
+  // Access Token 만료(401) → Refresh Token으로 재발급 후 재시도 (클라이언트 전용)
+  if (response.status === 401 && !_retried && typeof window !== 'undefined') {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      return request<T>(endpoint, options, true);
+    }
+    // Refresh Token도 만료 → 로그인 페이지로 이동
+    window.location.href = '/login?error=SESSION_EXPIRED';
+    throw { message: '세션이 만료되었습니다. 다시 로그인해주세요.', status: 401 } as ApiError;
+  }
 
   if (!response.ok) {
     const errorData = (await response.json().catch(() => ({}))) as Partial<ApiError>;

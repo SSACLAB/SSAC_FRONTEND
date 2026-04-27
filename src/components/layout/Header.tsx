@@ -5,7 +5,7 @@
  * - 이 컴포넌트 자체는 Server Component (즉시 SSR, JS 없음)
  * - 인터랙티브 요소(DesktopNav, MobileMenu)만 Client Component로 분리
  * - sticky + backdrop-blur + 고정 h-16으로 Layout Shift 방지
- * - 인증 상태는 ssac_auth 쿠키를 서버에서 읽어 자식에게 전달
+ * - 인증 상태는 accessToken 쿠키를 서버에서 읽어 자식에게 전달
  */
 
 import { cookies } from 'next/headers';
@@ -16,7 +16,7 @@ import { MobileMenu } from './MobileMenu';
 
 export async function Header() {
   const cookieStore = await cookies();
-  const isLoggedIn = cookieStore.has('ssac_auth');
+  const isLoggedIn = cookieStore.has('accessToken');
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur-sm">

@@ -11,7 +11,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const cookieStore = await cookies();
-  const token = cookieStore.get('ssac_auth')?.value;
+  const token = cookieStore.get('accessToken')?.value;
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
 

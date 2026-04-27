@@ -58,7 +58,14 @@
       "Bash(node_modules/.bin/openapi-typescript api-contract/swagger.json --output /tmp/test-types.ts)",
       "Bash(echo \"exit: $?\")",
       "Bash(echo \"EXIT: $?\")",
-      "Bash(echo \"exit without --output: $?\")"
+      "Bash(echo \"exit without --output: $?\")",
+      "Bash(src/app/api/auth/kakao/route.ts)",
+      "Bash(src/app/api/auth/kakao/callback/route.ts)",
+      "Bash(src/app/api/auth/refresh/route.ts)",
+      "Bash(src/app/auth/kakao/callback/page.tsx)",
+      "Bash(src/app/login/LoginForm.tsx)",
+      "Bash(src/services/api.ts)",
+      "Bash(.env.local)"
     ]
   }
 }
