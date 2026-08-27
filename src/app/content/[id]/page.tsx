@@ -286,7 +286,7 @@ function NotionBlockRenderer({ block }: { block: NotionBlock }) {
       );
     }
     case 'Image': {
-      // image.file.url: Cloudinary 영구 URL (expiryTime 무시)
+      // image.file.url: Cloudflare R2 영구 URL (expiryTime 무시)
       const file = blockData?.file as Record<string, unknown> | undefined;
       const external = blockData?.external as Record<string, unknown> | undefined;
       const src = (file?.url as string | undefined) ?? (external?.url as string | undefined);
